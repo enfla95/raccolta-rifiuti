@@ -1,0 +1,38 @@
+# IMPORTANTE: GitHub riconosce i workflow SOLO se si trovano nel percorso
+# esatto ".github/workflows/" dentro il repository. Questo e' un requisito
+# di GitHub stesso, non modificabile: quando carichi i file, questo file
+# deve finire su GitHub al percorso ".github/workflows/notify.yml"
+# (due sottocartelle), anche se qui sul Desktop e' tenuto insieme agli altri.
+
+name: Notifica raccolta rifiuti
+
+on:
+  schedule:
+    # Due orari fissi in UTC per coprire sia l'ora legale (CEST, UTC+2) sia
+    # l'ora solare (CET, UTC+1): lo script scarta l'esecuzione "sbagliata"
+    # controllando l'ora locale Europe/Rome, cosi' la notifica parte una
+    # sola volta al giorno, verso le 20:00 locali.
+    - cron: '0 18 * * *'
+    - cron: '0 19 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Installa la libreria web-push
+        run: npm install --no-save web-push@3
+
+      - name: Invia promemoria serale (se c'e' qualcosa da portare fuori)
+        env:
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          PUSH_SUBSCRIPTION: ${{ secrets.PUSH_SUBSCRIPTION }}
+        run: node send-notification.js

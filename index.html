@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Raccolta Rifiuti | Uggiate con Ronago</title>
+<meta name="description" content="Calendario raccolta rifiuti 2026/2027 - Uggiate con Ronago" />
+
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#1f6f78" />
+
+<!-- iOS: comportamento da app standalone quando aggiunta alla schermata Home -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Raccolta Rifiuti" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app">
+  <header class="app-header">
+    <h1>🗑️ Raccolta Rifiuti</h1>
+    <p class="subtitle">Uggiate con Ronago &middot; utenze domestiche</p>
+  </header>
+
+  <section class="summary-cards">
+    <div class="card" id="todayCard">
+      <span class="card-label">Oggi</span>
+      <div class="card-date" id="todayDate"></div>
+      <div class="card-items" id="todayItems"></div>
+    </div>
+    <div class="card highlight" id="tomorrowCard">
+      <span class="card-label">Stasera porta fuori (domani)</span>
+      <div class="card-date" id="tomorrowDate"></div>
+      <div class="card-items" id="tomorrowItems"></div>
+    </div>
+  </section>
+
+  <nav class="view-tabs" role="tablist">
+    <button type="button" class="tab active" data-view="month" role="tab" aria-selected="true">Mese</button>
+    <button type="button" class="tab" data-view="agenda" role="tab" aria-selected="false">Prossimi giorni</button>
+  </nav>
+
+  <section id="monthView" class="view">
+    <div class="month-nav">
+      <button type="button" id="prevMonth" aria-label="Mese precedente">‹</button>
+      <h2 id="monthLabel"></h2>
+      <button type="button" id="nextMonth" aria-label="Mese successivo">›</button>
+    </div>
+    <div class="weekdays">
+      <span>L</span><span>M</span><span>M</span><span>G</span><span>V</span><span>S</span><span>D</span>
+    </div>
+    <div class="calendar-grid" id="calendarGrid"></div>
+  </section>
+
+  <section id="agendaView" class="view" hidden>
+    <div class="agenda-list" id="agendaList"></div>
+  </section>
+
+  <section class="legend" id="legend">
+    <h3>Legenda</h3>
+    <div class="legend-grid" id="legendGrid"></div>
+  </section>
+
+  <section class="notif-settings">
+    <button type="button" id="enableNotifBtn" class="btn-primary">🔔 Attiva promemoria serale</button>
+    <p id="notifStatus" class="muted"></p>
+    <div id="subscriptionBox" class="subscription-box" hidden>
+      <textarea id="subscriptionText" class="subscription-text" readonly rows="6"></textarea>
+      <button type="button" id="copySubscriptionBtn" class="btn-secondary">Copia</button>
+      <p class="muted small">
+        Incolla questo testo nel GitHub Secret <code>PUSH_SUBSCRIPTION</code> del repository
+        (una volta sola, o di nuovo se lo riattivi dopo averlo disattivato). Vedi il README.
+      </p>
+    </div>
+    <p class="muted small">
+      Riceverai una notifica la sera prima con cosa portare fuori il giorno dopo.
+      Nei giorni senza raccolta non arriva nessuna notifica.
+    </p>
+  </section>
+
+  <footer class="app-footer">
+    <p class="muted small">Dati dal calendario ufficiale del Comune di Uggiate con Ronago, anno 2026/2027.</p>
+  </footer>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
