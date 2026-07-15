@@ -58,9 +58,13 @@ async function main() {
     throw new Error('Variabili VAPID_PRIVATE_KEY / PUSH_SUBSCRIPTION mancanti (imposta i GitHub Secrets, vedi README).');
   }
 
-  let subscription;
+  // PUSH_SUBSCRIPTION puo' essere un singolo oggetto (un dispositivo) oppure
+  // un array di oggetti (piu' dispositivi/telefoni): entrambi i formati sono
+  // accettati, cosi' non serve un secret diverso per ogni telefono.
+  let subscriptions;
   try {
-    subscription = JSON.parse(subscriptionRaw);
+    const parsed = JSON.parse(subscriptionRaw);
+    subscriptions = Array.isArray(parsed) ? parsed : [parsed];
   } catch (err) {
     throw new Error('PUSH_SUBSCRIPTION non e\' un JSON valido: ricopialo dall\'app (bottone "Attiva promemoria serale").');
   }
@@ -69,14 +73,26 @@ async function main() {
 
   const payload = JSON.stringify({ title: 'Raccolta rifiuti domani', body: contents });
 
-  try {
-    await webpush.sendNotification(subscription, payload);
-    console.log(`Notifica inviata per il ${tomorrow}: "${contents}"`);
-  } catch (err) {
-    if (err.statusCode === 404 || err.statusCode === 410) {
-      console.error('La subscription push non e\' piu\' valida (disattivata o scaduta): riattivala dall\'app e aggiorna il secret PUSH_SUBSCRIPTION.');
+  const results = await Promise.allSettled(
+    subscriptions.map((subscription) => webpush.sendNotification(subscription, payload))
+  );
+
+  let anySuccess = false;
+  results.forEach((result, i) => {
+    if (result.status === 'fulfilled') {
+      anySuccess = true;
+      console.log(`Notifica inviata al dispositivo ${i + 1}/${subscriptions.length} per il ${tomorrow}: "${contents}"`);
+    } else {
+      const err = result.reason;
+      console.error(`Dispositivo ${i + 1}/${subscriptions.length}: invio fallito (${err.statusCode || err.message}).`);
+      if (err.statusCode === 404 || err.statusCode === 410) {
+        console.error(`Dispositivo ${i + 1}/${subscriptions.length}: subscription non piu' valida (disattivata/scaduta) - rimuovila o riattivala e aggiorna il secret PUSH_SUBSCRIPTION.`);
+      }
     }
-    throw err;
+  });
+
+  if (!anySuccess) {
+    throw new Error('Invio fallito su tutti i dispositivi registrati.');
   }
 }
 
